@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Kingdom</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>👑 LUDO KINGDOM</h1>
+        <p>Welcome to the Ultimate Ludo Game</p>
+    </header>
+
+    <main class="game-container">
+
+        <div class="player-info">
+            <div class="player red-player">🔴 RED</div>
+            <div class="player green-player">🟢 GREEN</div>
+            <div class="player yellow-player">🟡 YELLOW</div>
+            <div class="player blue-player">🔵 BLUE</div>
+        </div>
+
+        <div class="board-container">
+            <div id="board" class="board">
+                <!-- Board will be created by JavaScript -->
+            </div>
+        </div>
+
+        <div class="game-controls">
+
+            <h2>🎲 Roll The Dice</h2>
+
+            <div id="dice">🎲</div>
+
+            <button id="rollButton" onclick="rollDice()">
+                ROLL DICE
+            </button>
+
+            <p id="status">Red Player's Turn</p>
+
+            <p id="turn">Waiting for dice...</p>
+
+        </div>
+
+        <div class="game-rules">
+            <h3>Game Rules</h3>
+            <p>Each player has 4 tokens.</p>
+            <p>Roll a 6 to start your token.</p>
+            <p>Reach the center to win!</p>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
