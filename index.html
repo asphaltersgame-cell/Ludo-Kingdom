@@ -6,33 +6,43 @@
     <title>Ludo Kingdom</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <header>
+    <header class="game-header">
         <h1>👑 LUDO KINGDOM</h1>
-        <p>Welcome to the Ultimate Ludo Game</p>
     </header>
 
     <main class="game-container">
 
-        <div class="player-info">
-            <div class="player red-player">🔴 RED</div>
-            <div class="player green-player">🟢 GREEN</div>
-            <div class="player yellow-player">🟡 YELLOW</div>
-            <div class="player blue-player">🔵 BLUE</div>
-        </div>
+        <div class="player-layout">
 
-        <div class="board-container">
-            <div id="board" class="board">
-                <!-- Board will be created by JavaScript -->
+            <div class="player-card red-card" id="player-red">
+                <div class="player-name">🔴 Red Player</div>
+                <div class="dice-holder" id="dice-holder-red"></div>
             </div>
+
+            <div class="player-card green-card" id="player-green">
+                <div class="player-name">🟢 Green Player</div>
+                <div class="dice-holder" id="dice-holder-green"></div>
+            </div>
+
+            <div class="board-container">
+                <div id="board" class="board"></div>
+            </div>
+
+            <div class="player-card blue-card" id="player-blue">
+                <div class="player-name">🔵 Blue Player</div>
+                <div class="dice-holder" id="dice-holder-blue"></div>
+            </div>
+
+            <div class="player-card yellow-card" id="player-yellow">
+                <div class="player-name">🟡 Yellow Player</div>
+                <div class="dice-holder" id="dice-holder-yellow"></div>
+            </div>
+
         </div>
 
         <div class="game-controls">
-
-            <h2>🎲 Roll The Dice</h2>
-
             <div id="dice">🎲</div>
 
             <button id="rollButton" onclick="rollDice()">
@@ -40,13 +50,10 @@
             </button>
 
             <p id="status">Red Player's Turn</p>
-
-            <p id="turn">Waiting for dice...</p>
-
+            <p id="turn">Roll the dice to play</p>
         </div>
 
         <div class="game-rules">
-            <h3>Game Rules</h3>
             <p>Each player has 4 tokens.</p>
             <p>Roll a 6 to start your token.</p>
             <p>Reach the center to win!</p>
@@ -55,6 +62,5 @@
     </main>
 
     <script src="app.js"></script>
-
 </body>
 </html>
