@@ -1,10 +1,10 @@
 const board = document.getElementById("board");
 const dice = document.getElementById("dice");
-const status = document.getElementById("status");
+const statusText = document.getElementById("status");
 const turnText = document.getElementById("turn");
 
 const players = ["red", "green", "yellow", "blue"];
-const playerNames = ["Red", "Green", "Yellow", "Blue"];
+const names = ["Red", "Green", "Yellow", "Blue"];
 const startPoints = [0, 13, 26, 39];
 
 const path = [
@@ -26,7 +26,7 @@ const homeLanes = [
  [[13,7],[12,7],[11,7],[10,7],[9,7]]
 ];
 
-const homeAreas = [
+const homes = [
  {r:0,c:0,color:"red"},
  {r:0,c:9,color:"green"},
  {r:9,c:9,color:"yellow"},
@@ -38,69 +38,60 @@ const safeSquares = [0,8,13,21,26,34,39,47];
 let currentPlayer = 0;
 let diceValue = 0;
 let waitingForMove = false;
-let gameOver = false;
 let moving = false;
+let gameOver = false;
 
-let tokens = players.map(() => [
- {position:-1},
- {position:-1},
- {position:-1},
- {position:-1}
-]);
+const tokens = players.map(() =>
+    Array.from({length:4}, () => ({position:-1}))
+);
 
-function makeCell(r,c,classes="") {
-    const cell = document.createElement("div");
-    cell.className = "cell " + classes;
-    cell.style.gridRow = r + 1;
-    cell.style.gridColumn = c + 1;
-    cell.id = `cell-${r}-${c}`;
-    board.appendChild(cell);
-    return cell;
-}
-
+// Create board
 function createBoard() {
     board.innerHTML = "";
 
-    homeAreas.forEach(area => {
-        const home = document.createElement("div");
-        home.className = "home-zone " + area.color + "-home";
-        home.style.gridRow = `${area.r + 1} / span 6`;
-        home.style.gridColumn = `${area.c + 1} / span 6`;
-        home.style.display = "flex";
-        home.style.alignItems = "center";
-        home.style.justifyContent = "center";
-        home.style.border = "2px solid #222";
+    homes.forEach(home => {
+        const zone = document.createElement("div");
+        zone.className = home.color + "-home";
+        zone.style.gridRow = `${home.r + 1} / span 6`;
+        zone.style.gridColumn = `${home.c + 1} / span 6`;
+        zone.style.display = "flex";
+        zone.style.alignItems = "center";
+        zone.style.justifyContent = "center";
+        zone.style.border = "2px solid #222";
 
         const inner = document.createElement("div");
         inner.className = "home-inner";
-        inner.id = area.color + "-home-inner";
+        inner.id = home.color + "-home-inner";
 
-        home.appendChild(inner);
-        board.appendChild(home);
+        zone.appendChild(inner);
+        board.appendChild(zone);
     });
 
     path.forEach((point,index) => {
         const cell = makeCell(point[0],point[1],"path");
+        cell.id = "path-" + index;
 
         if (safeSquares.includes(index)) {
             cell.classList.add("safe");
-            addMark(cell,"★");
+            cell.textContent = "★";
         }
 
         if ([0,13,26,39].includes(index)) {
-            addMark(cell,"➤");
+            cell.textContent = "➤";
         }
     });
 
-    homeLanes.forEach((lane,player) => {
-        lane.forEach(point => {
-            makeCell(point[0],point[1],players[player] + "-path");
+    homeLanes.forEach((lane,p) => {
+        lane.forEach((point,i) => {
+            const cell = makeCell(
+                point[0],point[1],players[p] + "-path"
+            );
+            cell.id = `lane-${p}-${i}`;
         });
     });
 
     const center = document.createElement("div");
     center.className = "center-home";
-    center.id = "finish-center";
     center.style.gridRow = "7 / span 3";
     center.style.gridColumn = "7 / span 3";
     center.textContent = "👑";
@@ -110,126 +101,132 @@ function createBoard() {
     renderTokens();
 }
 
-function addMark(cell,symbol) {
-    const mark = document.createElement("span");
-    mark.textContent = symbol;
-    mark.style.position = "absolute";
-    mark.style.fontSize = "clamp(9px, 2vw, 16px)";
-    mark.style.color = "#222";
-    mark.style.opacity = "0.8";
-    mark.style.pointerEvents = "none";
-    cell.appendChild(mark);
+function makeCell(r,c,classes) {
+    const cell = document.createElement("div");
+    cell.className = "cell " + classes;
+    cell.style.gridRow = r + 1;
+    cell.style.gridColumn = c + 1;
+    board.appendChild(cell);
+    return cell;
 }
 
-function getTokenCell(player,token) {
-    const position = token.position;
+// Put dice beside active player
+function updatePlayerTurn() {
+    players.forEach((color,p) => {
+        const card = document.getElementById("player-" + color);
+        const holder = document.getElementById("dice-holder-" + color);
 
-    if (position === -1) return null;
+        card.classList.toggle("active",p === currentPlayer);
 
-    if (position < 52) {
-        const index = (startPoints[player] + position) % 52;
-        const point = path[index];
-        return document.getElementById(
-            `cell-${point[0]}-${point[1]}`
-        );
-    }
+        if (p === currentPlayer) {
+            holder.appendChild(dice);
+        }
+    });
 
-    if (position < 57) {
-        const point = homeLanes[player][position - 52];
-        return document.getElementById(
-            `cell-${point[0]}-${point[1]}`
-        );
-    }
-
-    return document.getElementById("finish-center");
+    statusText.textContent = names[currentPlayer] + " Player's Turn";
+    turnText.textContent = "Roll the dice to play";
 }
 
-function makeToken(player,tokenNumber) {
+// Token creation
+function makeToken(p,t) {
     const piece = document.createElement("button");
-    piece.className = "token " + players[player];
-    piece.dataset.player = player;
-    piece.dataset.token = tokenNumber;
+    piece.className = "token " + players[p];
+    piece.dataset.player = p;
+    piece.dataset.token = t;
     piece.type = "button";
+    piece.setAttribute("aria-label",names[p] + " token " + (t+1));
     piece.onclick = selectToken;
     return piece;
 }
 
-function renderTokens() {
-    document.querySelectorAll(".moving-token").forEach(piece => {
-        piece.remove();
-    });
+function getTokenCell(p,token) {
+    const pos = token.position;
 
-    players.forEach((player,p) => {
-        const inner = document.getElementById(player + "-home-inner");
+    if (pos < 0) return null;
+
+    if (pos < 52) {
+        const index = (startPoints[p] + pos) % 52;
+        return document.getElementById("path-" + index);
+    }
+
+    if (pos < 57) {
+        return document.getElementById(`lane-${p}-${pos-52}`);
+    }
+
+    return document.querySelector(".center-home");
+}
+
+function renderTokens() {
+    document.querySelectorAll(".moving-token").forEach(el => el.remove());
+
+    players.forEach((color,p) => {
+        const inner = document.getElementById(color + "-home-inner");
         inner.innerHTML = "";
 
         tokens[p].forEach((token,t) => {
             if (token.position === -1) {
                 inner.appendChild(makeToken(p,t));
             } else {
-                const emptySlot = document.createElement("div");
-                emptySlot.className = "token-slot";
-                inner.appendChild(emptySlot);
+                const slot = document.createElement("div");
+                slot.className = "token-slot";
+                inner.appendChild(slot);
             }
         });
     });
 
-    players.forEach((player,p) => {
+    players.forEach((color,p) => {
         tokens[p].forEach((token,t) => {
             if (token.position === -1) return;
 
-            const target = getTokenCell(p,token);
-            if (!target) return;
+            const cell = getTokenCell(p,token);
+            if (!cell) return;
 
             const piece = makeToken(p,t);
             piece.classList.add("moving-token");
             piece.style.width = "88%";
             piece.style.height = "88%";
-            piece.style.padding = "0";
-            piece.style.position = "relative";
-            piece.style.zIndex = "2";
-
-            target.appendChild(piece);
+            cell.appendChild(piece);
         });
     });
 }
 
+// Dice
 function rollDice() {
     if (waitingForMove || moving || gameOver) return;
 
-    diceValue = Math.floor(Math.random() * 6) + 1;
-    dice.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][diceValue - 1];
+    diceValue = Math.floor(Math.random()*6)+1;
+    dice.textContent = ["⚀","⚁","⚂","⚃","⚄","⚅"][diceValue-1];
 
     waitingForMove = true;
 
-    const movable = tokens[currentPlayer].some(token => {
+    const possible = tokens[currentPlayer].some(token => {
         if (token.position === -1) return diceValue === 6;
         return token.position + diceValue <= 57;
     });
 
-    if (!movable) {
-        status.textContent = playerNames[currentPlayer] +
-            " cannot move. Next player's turn.";
+    if (!possible) {
+        statusText.textContent = names[currentPlayer] +
+            " cannot move!";
         waitingForMove = false;
         setTimeout(nextTurn,1200);
         return;
     }
 
-    status.textContent = playerNames[currentPlayer] +
-        " rolled " + diceValue + ". Select a token.";
-
-    turnText.textContent = "Tap one of your tokens";
+    statusText.textContent = names[currentPlayer] +
+        " rolled " + diceValue;
+    turnText.textContent = "Select your token";
 }
 
+// Move one square at a time
 async function selectToken(event) {
     if (!waitingForMove || moving || gameOver) return;
 
-    const player = Number(event.currentTarget.dataset.player);
-    const tokenNumber = Number(event.currentTarget.dataset.token);
+    const p = Number(event.currentTarget.dataset.player);
+    const t = Number(event.currentTarget.dataset.token);
 
-    if (player !== currentPlayer) return;
+    if (p !== currentPlayer) return;
 
-    const token = tokens[player][tokenNumber];
+    const token = tokens[p][t];
 
     if (token.position === -1 && diceValue !== 6) return;
     if (token.position >= 0 && token.position + diceValue > 57) return;
@@ -240,32 +237,39 @@ async function selectToken(event) {
     if (token.position === -1) {
         token.position = 0;
         renderTokens();
-        await pause(350);
+        await pause(300);
     } else {
-        for (let step = 0; step < diceValue; step++) {
+        for (let i=0; i<diceValue; i++) {
             token.position++;
             renderTokens();
-            await pause(300);
+
+            const cell = getTokenCell(p,token);
+            if (cell && token.position < 57) {
+                cell.classList.add("move-trail");
+                setTimeout(() => {
+                    cell.classList.remove("move-trail");
+                },900);
+            }
+
+            await pause(280);
         }
     }
 
-    captureOpponents(player,token.position);
+    captureOpponents(p,token.position);
     renderTokens();
 
     moving = false;
 
-    if (tokens[player].every(t => t.position === 57)) {
+    if (tokens[p].every(item => item.position === 57)) {
         gameOver = true;
-        status.textContent = "🏆 " + playerNames[player] +
-            " Player Wins LUDO KINGDOM!";
-        turnText.textContent = "Game Over!";
+        statusText.textContent = "🏆 " + names[p] + " WINS!";
+        turnText.textContent = "Game Over";
         return;
     }
 
     if (diceValue === 6) {
-        status.textContent = playerNames[player] +
-            " rolled a 6! Roll again.";
-        turnText.textContent = "Your extra turn";
+        statusText.textContent = names[p] + " gets another turn!";
+        turnText.textContent = "Roll the dice again";
         diceValue = 0;
         return;
     }
@@ -273,25 +277,20 @@ async function selectToken(event) {
     nextTurn();
 }
 
-function pause(ms) {
-    return new Promise(resolve => setTimeout(resolve,ms));
-}
-
-function captureOpponents(player,position) {
+function captureOpponents(p,position) {
     if (position < 0 || position >= 52) return;
 
-    const globalPosition = (startPoints[player] + position) % 52;
-
+    const globalPosition = (startPoints[p] + position) % 52;
     if (safeSquares.includes(globalPosition)) return;
 
-    players.forEach((otherPlayer,otherIndex) => {
-        if (otherIndex === player) return;
+    players.forEach((color,other) => {
+        if (other === p) return;
 
-        tokens[otherIndex].forEach(token => {
+        tokens[other].forEach(token => {
             if (token.position < 0 || token.position >= 52) return;
 
             const otherPosition =
-                (startPoints[otherIndex] + token.position) % 52;
+                (startPoints[other] + token.position) % 52;
 
             if (otherPosition === globalPosition) {
                 token.position = -1;
@@ -300,14 +299,18 @@ function captureOpponents(player,position) {
     });
 }
 
+function pause(ms) {
+    return new Promise(resolve => setTimeout(resolve,ms));
+}
+
 function nextTurn() {
     currentPlayer = (currentPlayer + 1) % 4;
     diceValue = 0;
     waitingForMove = false;
 
     dice.textContent = "🎲";
-    status.textContent = playerNames[currentPlayer] + " Player's Turn";
-    turnText.textContent = "Roll the dice to play";
+    updatePlayerTurn();
 }
 
 createBoard();
+updatePlayerTurn();
