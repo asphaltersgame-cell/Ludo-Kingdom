@@ -1,211 +1,43 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background: #15172e;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    min-height: 100vh;
-}
-
-header {
-    padding: 18px 5px;
-}
-
-h1 {
-    color: #ffd447;
-    font-size: 30px;
-}
-
-header p {
-    color: #ccc;
-    margin-top: 8px;
-}
-
-.game-container {
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    padding: 12px;
-}
-
-.player-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.player {
-    padding: 12px;
-    border-radius: 9px;
-    font-weight: bold;
-}
-
-.red-player { background: #e53935; }
-.green-player { background: #159d58; }
-.yellow-player { background: #e5b923; color: #222; }
-.blue-player { background: #2468d9; }
-
-.board-container {
-    width: 100%;
-    background: white;
-    padding: 5px;
-    border-radius: 10px;
-}
-
-.board {
-    display: grid;
-    grid-template-columns: repeat(15, 1fr);
-    grid-template-rows: repeat(15, 1fr);
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    background: #ddd;
-    border: 2px solid #222;
-}
-
-.cell {
-    border: 1px solid #aaa;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    min-height: 0;
-    position: relative;
-}
-
-.red-home { background: #e53935; }
-.green-home { background: #159d58; }
-.yellow-home { background: #ffdf55; }
-.blue-home { background: #2468d9; }
-
-.home-inner {
-    width: 78%;
-    height: 78%;
-    background: #fff;
-    border: 3px solid #333;
-    border-radius: 15px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 12%;
-    padding: 12%;
-    box-shadow: inset 0 2px 6px #aaa;
-    align-items: center;
-    justify-items: center;
-}
-
-.token {
+/* Empty token spaces inside home */
+.token-slot {
     width: 100%;
     height: 100%;
-    min-width: 0;
-    min-height: 0;
-    padding: 0;
     aspect-ratio: 1 / 1;
+    border: 2px dashed rgba(40,40,40,0.45);
     border-radius: 50%;
-    border: 3px solid white;
-    display: flex;
+    background: rgba(0,0,0,0.08);
+}
+
+/* Make the four home tokens fit neatly */
+.home-inner {
     align-items: center;
-    justify-content: center;
-    position: relative;
-    cursor: pointer;
-    box-shadow:
-        0 4px 5px rgba(0,0,0,0.45),
-        inset 0 3px 4px rgba(255,255,255,0.6),
-        inset 0 -4px 5px rgba(0,0,0,0.25);
+    justify-items: center;
+    gap: 12%;
 }
 
-.token::after {
-    content: "";
-    width: 30%;
-    height: 30%;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.45);
-    position: absolute;
-    top: 15%;
-    left: 18%;
+/* Improve tokens on the board path */
+.moving-token {
+    margin: auto;
+    flex-shrink: 0;
+    touch-action: manipulation;
 }
 
-.token.red {
-    background: radial-gradient(circle at 30% 25%, #ff8585, #ed1717 55%, #a80000);
-}
-
-.token.green {
-    background: radial-gradient(circle at 30% 25%, #8affaa, #08a64d 55%, #00632b);
-}
-
-.token.yellow {
-    background: radial-gradient(circle at 30% 25%, #fff5a0, #ffc400 55%, #a87500);
-}
-
-.token.blue {
-    background: radial-gradient(circle at 30% 25%, #9dcaff, #1269e8 55%, #003a91);
-}
-
-.path {
-    background: white;
-}
-
-.safe {
+/* Star and arrow markings */
+.cell.safe {
     background: #ffe082;
 }
 
-.red-path { background: #ef5350; }
-.green-path { background: #4caf50; }
-.yellow-path { background: #ffdf55; }
-.blue-path { background: #42a5f5; }
-
-.center-home {
-    background: conic-gradient(
-        #e53935 0deg 90deg,
-        #4caf50 90deg 180deg,
-        #ffdf55 180deg 270deg,
-        #42a5f5 270deg 360deg
-    );
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 25px;
+.cell.path {
+    position: relative;
 }
 
-.game-controls {
-    margin: 20px 0;
-}
-
-#dice {
-    font-size: 55px;
-    margin: 12px;
-}
-
-button {
-    background: #ffd447;
-    color: #222;
-    border: none;
-    padding: 14px 30px;
-    border-radius: 10px;
-    font-size: 17px;
+/* Board cell markings stay behind tokens */
+.cell > span {
+    z-index: 0;
     font-weight: bold;
-    cursor: pointer;
 }
 
-button.token {
-    padding: 0;
-}
-
-#status, #turn {
-    margin: 12px;
-    color: #ffd447;
-}
-
-.game-rules {
-    padding: 15px;
-    background: #25294b;
-    border-radius: 10px;
-    margin: 15px 0;
-    line-height: 1.8;
+/* Keep tokens above board markings */
+.cell .moving-token {
+    z-index: 2;
 }
