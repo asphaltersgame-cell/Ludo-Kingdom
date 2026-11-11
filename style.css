@@ -1,43 +1,275 @@
-/* Empty token spaces inside home */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #101a38;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    min-height: 100vh;
+}
+
+.game-header {
+    padding: 12px 5px;
+}
+
+.game-header h1 {
+    color: #ffd447;
+    font-size: clamp(23px, 5vw, 34px);
+    text-shadow: 0 2px 8px #d58b00;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 650px;
+    margin: auto;
+    padding: 8px;
+}
+
+.player-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "red green"
+        "board board"
+        "blue yellow";
+    gap: 8px;
+    align-items: center;
+}
+
+.red-card { grid-area: red; }
+.green-card { grid-area: green; }
+.blue-card { grid-area: blue; }
+.yellow-card { grid-area: yellow; }
+
+.player-card {
+    min-width: 0;
+    min-height: 58px;
+    padding: 9px 5px;
+    border: 3px solid rgba(255,255,255,0.35);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.25s ease;
+}
+
+.red-card { background: #a91820; }
+.green-card { background: #087c3c; }
+.blue-card { background: #0649a7; }
+.yellow-card { background: #b88b00; color: #171717; }
+
+.player-card.active {
+    border: 3px solid #fff;
+    box-shadow:
+        0 0 8px #fff,
+        0 0 18px #ffd447,
+        inset 0 0 12px rgba(255,255,255,0.35);
+    transform: scale(1.035);
+}
+
+.player-name {
+    font-size: clamp(13px, 3.5vw, 18px);
+    font-weight: bold;
+}
+
+.dice-holder {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-container {
+    grid-area: board;
+    width: 100%;
+    background: #d5d5d5;
+    padding: 4px;
+    border: 3px solid #d8a83d;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px #000;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background: #ddd;
+    border: 2px solid #222;
+}
+
+.cell {
+    border: 1px solid #999;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+}
+
+.red-home { background: #e53935; }
+.green-home { background: #159d58; }
+.yellow-home { background: #ffdf55; }
+.blue-home { background: #2468d9; }
+
+.home-inner {
+    width: 78%;
+    height: 78%;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 12%;
+    padding: 12%;
+    align-items: center;
+    justify-items: center;
+}
+
 .token-slot {
     width: 100%;
     height: 100%;
     aspect-ratio: 1 / 1;
-    border: 2px dashed rgba(40,40,40,0.45);
+    border: 2px dashed #999;
     border-radius: 50%;
-    background: rgba(0,0,0,0.08);
+    background: #eee;
 }
 
-/* Make the four home tokens fit neatly */
-.home-inner {
+.token {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border: 3px solid white;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    box-shadow:
+        0 4px 5px rgba(0,0,0,0.45),
+        inset 0 3px 4px rgba(255,255,255,0.6),
+        inset 0 -4px 5px rgba(0,0,0,0.25);
+}
+
+.token::after {
+    content: "";
+    width: 30%;
+    height: 30%;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    position: absolute;
+    top: 15%;
+    left: 18%;
+}
+
+.token.red {
+    background: radial-gradient(circle at 30% 25%, #ff8585, #ed1717 55%, #a80000);
+}
+
+.token.green {
+    background: radial-gradient(circle at 30% 25%, #8affaa, #08a64d 55%, #00632b);
+}
+
+.token.yellow {
+    background: radial-gradient(circle at 30% 25%, #fff5a0, #ffc400 55%, #a87500);
+}
+
+.token.blue {
+    background: radial-gradient(circle at 30% 25%, #9dcaff, #1269e8 55%, #003a91);
+}
+
+.path { background: white; }
+.safe { background: #ffe082; }
+
+.red-path { background: #ef5350; }
+.green-path { background: #4caf50; }
+.yellow-path { background: #ffdf55; }
+.blue-path { background: #42a5f5; }
+
+.center-home {
+    background: conic-gradient(
+        #e53935 0deg 90deg,
+        #4caf50 90deg 180deg,
+        #ffdf55 180deg 270deg,
+        #42a5f5 270deg 360deg
+    );
+    display: flex;
     align-items: center;
-    justify-items: center;
-    gap: 12%;
+    justify-content: center;
+    font-size: 25px;
 }
 
-/* Improve tokens on the board path */
 .moving-token {
     margin: auto;
+    z-index: 2;
     flex-shrink: 0;
-    touch-action: manipulation;
 }
 
-/* Star and arrow markings */
-.cell.safe {
-    background: #ffe082;
+#dice {
+    font-size: 42px;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px auto;
+    background: white;
+    color: #222;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px #000;
 }
 
-.cell.path {
-    position: relative;
+.game-controls {
+    margin: 15px 0;
 }
 
-/* Board cell markings stay behind tokens */
-.cell > span {
-    z-index: 0;
+button:not(.token) {
+    background: #ffd447;
+    color: #222;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#status, #turn {
+    margin: 10px;
+    color: #ffd447;
     font-weight: bold;
 }
 
-/* Keep tokens above board markings */
-.cell .moving-token {
-    z-index: 2;
+.game-rules {
+    padding: 12px;
+    background: #202c50;
+    border-radius: 10px;
+    margin: 12px 0;
+    line-height: 1.7;
+}
+
+@media (max-width: 380px) {
+    .player-card {
+        min-height: 48px;
+        padding: 6px 3px;
+    }
+
+    .player-name {
+        font-size: 12px;
+    }
+
+    .board-container {
+        padding: 3px;
+    }
 }
